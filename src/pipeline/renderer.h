@@ -4,6 +4,7 @@
 
 #include "light.h"
 
+
 //forward declarations
 class Camera;
 class Skeleton;
@@ -38,6 +39,20 @@ namespace SCN {
 
 		//add here your functions
 		//...
+		class RenderCall {
+			public:
+				GFX::Mesh* mesh;
+				Material* material;
+				Matrix44 model;
+
+				float distance_to_camera;
+		};
+
+		std::vector<RenderCall> renderCalls;
+
+		float distance(vec3 p1, vec3 p2);
+		
+
 
 		//renders several elements of the scene
 		void renderScene(SCN::Scene* scene, Camera* camera);

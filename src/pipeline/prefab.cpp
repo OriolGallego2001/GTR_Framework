@@ -18,6 +18,16 @@ using namespace SCN;
 int Node::s_NodeID = 0;
 Node* Node::s_selected = nullptr;
 
+GFX::Mesh* SCN::Node::getMesh()
+{
+	return mesh;
+}
+
+Material* SCN::Node::getMaterial()
+{
+	return material;
+}
+
 Node::Node() : parent(nullptr), mesh(nullptr), material(nullptr), visible(true)
 {
 	m_Id = s_NodeID++;

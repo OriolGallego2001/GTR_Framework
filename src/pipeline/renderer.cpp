@@ -45,6 +45,13 @@ void Renderer::setupScene()
 		skybox_cubemap = nullptr;
 }
 
+float SCN::Renderer::distance(vec3 p1, vec3 p2)
+{
+	return std::sqrt(pow(p1.x-p2.x,2.0)+ pow(p1.y - p2.y, 2.0)+ pow(p1.z - p2.z, 2.0));
+}
+
+
+
 void Renderer::renderScene(SCN::Scene* scene, Camera* camera)
 {
 	this->scene = scene;
@@ -75,10 +82,31 @@ void Renderer::renderScene(SCN::Scene* scene, Camera* camera)
 		if (ent->getType() == eEntityType::PREFAB)
 		{
 			PrefabEntity* pent = (SCN::PrefabEntity*)ent;
-			if (pent->prefab)
-				renderNode( &pent->root, camera);
+			if (pent->prefab) {
+
+				//renderNode( &pent->root, camera); Old nonsense where we don't prioritize to render further objects
+				RenderCall rc;
+				vec3 nodepos = pent->root.getGlobalMatrix().getTranslation();
+				rc.mesh = pent->root.getMesh();
+				rc.material = pent->root.getMaterial();
+				rc.model = pent->root.getGlobalMatrix();
+				rc.distance_to_camera = distance(camera->center, nodepos);
+				
+				renderCalls.push_back(rc);
+			}
+
 		}
 	}
+
+	std::sort(renderCalls.begin(), renderCalls.end(), [](const RenderCall& a, const RenderCall& b) {
+		return a.distance_to_camera > b.distance_to_camera;
+	});
+
+	for (const RenderCall& obj : renderCalls) {
+		renderMeshWithMaterial(obj.model,obj.mesh,obj.material);
+	}
+
+
 }
 
 

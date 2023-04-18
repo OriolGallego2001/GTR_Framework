@@ -41,6 +41,9 @@ namespace SCN {
 		GFX::Mesh* mesh;
 		Material* material;
 
+		GFX:: Mesh* getMesh();
+		Material* getMaterial();
+
 		Matrix44 model;	//the matrix that defines where is the object (in relation to its parent)
 		Matrix44 global_model;	//the matrix that defines where is the object (in relation to the world)
 
