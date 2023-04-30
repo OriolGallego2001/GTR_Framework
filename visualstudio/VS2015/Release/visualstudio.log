@@ -1,16 +1,51 @@
 ﻿  renderer.cpp
 C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\extra\cJSON.h(104,1): warning C4099: 'cJSON': nombre de tipo visto anteriormente usando 'class' ahora se ve usando 'struct'
 C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\extra\cJSON.h(103): message : vea la declaración de 'cJSON'
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(50,18): warning C4244: 'return': conversión de 'double' a 'float'; posible pérdida de datos
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(75,20): warning C4018: '<': no coinciden signed/unsigned
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(166,20): warning C4018: '<': no coinciden signed/unsigned
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(222,10): warning C4244: 'inicializando': conversión de 'long' a 'float'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(51,20): warning C4018: '<': no coinciden signed/unsigned
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(68,18): warning C4244: 'return': conversión de 'double' a 'float'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(96,20): warning C4018: '<': no coinciden signed/unsigned
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(211,20): warning C4018: '<': no coinciden signed/unsigned
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(272,10): warning C4244: 'inicializando': conversión de 'long' a 'float'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(358,10): warning C4244: 'inicializando': conversión de 'long' a 'float'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(385,20): warning C4018: '<': no coinciden signed/unsigned
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(390,53): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(393,82): warning C4244: 'argumento': conversión de 'double' a 'T'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(393,47): warning C4244: 'argumento': conversión de 'double' a 'T'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(476,10): warning C4244: 'inicializando': conversión de 'long' a 'float'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(499,20): warning C4018: '<': no coinciden signed/unsigned
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(505,39): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(507,68): warning C4244: 'argumento': conversión de 'double' a 'T'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(507,29): warning C4244: 'argumento': conversión de 'double' a 'T'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
      Creando biblioteca ..\..\GTR.lib y objeto ..\..\GTR.exp
 LINK : warning LNK4098: la biblioteca predeterminada'LIBCMT' entra en conflicto con otras bibliotecas; use la biblioteca /NODEFAULTLIB:biblioteca
   Generando código
-  0 of 5822 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+  111 of 5879 functions ( 1.9%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+    84 functions had inline decision re-evaluated but remain unchanged
   Generación de código finalizada
 glew32s.lib(glew.obj) : warning LNK4099: no se encontró PDB 'vc120.pdb' con 'glew32s.lib(glew.obj)' o en 'C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\vc120.pdb'; se vinculará el objeto sin tener en cuenta información de depuración
   visualstudio.vcxproj -> C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\GTR.exe
