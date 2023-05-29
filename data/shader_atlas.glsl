@@ -9,6 +9,7 @@ multi basic.vs multi.fs
 gbuffers basic.vs gbuffers.fs
 tonemapper quad.vs tonemapper.fs
 ssao quad.vs ssao.fs
+spherical_probe basic.vs spherical_probe.fs
 
 deferred_global quad.vs deferred_global.fs
 deferred_light basic.vs deferred_light.fs
@@ -992,4 +993,63 @@ void main()
 
 	FragColor = color;
 	gl_FragDepth = depth;
+}
+
+\spherical_probe.fs
+
+#version 330 core
+
+in vec3 v_world_position;
+in vec3 v_normal;
+uniform vec3 u_coeffs[9];
+
+
+const float Pi = 3.141592654;
+const float CosineA0 = Pi;
+const float CosineA1 = (2.0 * Pi) / 3.0;
+const float CosineA2 = Pi * 0.25;
+struct SH9 { float c[9]; }; //to store weights
+struct SH9Color { vec3 c[9]; }; //to store colors
+
+void SHCosineLobe(in vec3 dir, out SH9 sh) //SH9
+{
+	// Band 0
+	sh.c[0] = 0.282095 * CosineA0;
+	// Band 1
+	sh.c[1] = 0.488603 * dir.y * CosineA1;
+	sh.c[2] = 0.488603 * dir.z * CosineA1;
+	sh.c[3] = 0.488603 * dir.x * CosineA1;
+	// Band 2
+	sh.c[4] = 1.092548 * dir.x * dir.y * CosineA2;
+	sh.c[5] = 1.092548 * dir.y * dir.z * CosineA2;
+	sh.c[6] = 0.315392 * (3.0 * dir.z * dir.z - 1.0) * CosineA2;
+	sh.c[7] = 1.092548 * dir.x * dir.z * CosineA2;
+	sh.c[8] = 0.546274 * (dir.x * dir.x - dir.y * dir.y) * CosineA2;
+}
+
+vec3 ComputeSHIrradiance(in vec3 normal, in SH9Color sh)
+{
+	// Compute the cosine lobe in SH, oriented about the normal direction
+	SH9 shCosine;
+	SHCosineLobe(normal, shCosine);
+	// Compute the SH dot product to get irradiance
+	vec3 irradiance = vec3(0.0);
+	for (int i = 0; i < 9; ++i)
+		irradiance += sh.c[i] * shCosine.c[i];
+
+	return irradiance;
+}
+
+
+out vec4 FragColor;
+
+void main()
+{
+	vec4 color = vec4(1.0);
+	vec3 N = normalize(v_normal);
+	SH9Color sh;
+	for (int i = 0; i < 9; i++)
+		sh.c[i] = u_coeffs[i];
+	color.xyz = max(vec3(0.0), ComputeSHIrradiance(N, sh));
+	FragColor = color;
 }

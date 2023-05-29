@@ -14,7 +14,6 @@
 #include "../utils/utils.h"
 #include "../extra/hdre.h"
 #include "../core/ui.h"
-
 #include "scene.h"
 
 
@@ -25,6 +24,8 @@ GFX::Mesh sphere;
 
 GFX::FBO* gbuffers_fbo = nullptr;
 GFX::FBO* illumination_fbo = nullptr;
+
+
 
 Renderer::Renderer(const char* shader_atlas_filename)
 {
@@ -53,6 +54,7 @@ Renderer::Renderer(const char* shader_atlas_filename)
 
 	ssao_fbo = new GFX::FBO();
 	ssao_fbo->create(size.x, size.y, 1, GL_RGB, GL_UNSIGNED_BYTE, false);
+	irr_fbo = nullptr;
 
 	if (!GFX::Shader::LoadAtlas(shader_atlas_filename))
 		exit(1);
@@ -60,6 +62,9 @@ Renderer::Renderer(const char* shader_atlas_filename)
 
 	sphere.createSphere(1.0f);
 	sphere.uploadToVRAM();
+
+	probe.pos.set(65, 65, 65);
+	probe.sh.coeffs[0].set(1, 0, 0);
 }
 
 void Renderer::setupScene(Camera* camera)
@@ -693,6 +698,64 @@ void Renderer::renderMeshWithMaterialLightSinglePass(const Matrix44 model, GFX::
 
 }
 
+void SCN::Renderer::captureProbe(sProbe& probe)
+{
+	render_mode = eRenderMode::LIGHTMULTIPASS;
+
+	FloatImage images[6]; //here we will store the six views
+	Camera cam;
+	//set the fov to 90 and the aspect to 1
+	cam.setPerspective(90, 1, 0.1, 1000);
+
+	if (!irr_fbo)
+	{
+		irr_fbo = new GFX::FBO();
+		irr_fbo->create(64, 64, 1,GL_RGB, GL_FLOAT);
+	}
+
+	for (int i = 0; i < 6; ++i) //for every cubemap face
+	{
+		//compute camera orientation using defined vectors
+		vec3 eye = probe.pos;
+		vec3 front = cubemapFaceNormals[i][2];
+		vec3 center = probe.pos + front;
+		vec3 up = cubemapFaceNormals[i][1];
+		cam.lookAt(eye, center, up);
+		cam.enable();
+
+		//render the scene from this point of view
+		irr_fbo->bind();
+		renderForward(scene, &cam);
+		irr_fbo->unbind();
+
+		//read the pixels back and store in a FloatImage
+		images[i].fromTexture(irr_fbo->color_textures[0]);
+	}
+	render_mode = eRenderMode::DEFERRED;
+	//compute the coefficients given the six images
+	probe.sh = computeSH(images);
+	
+}
+
+void SCN::Renderer::renderProbe(sProbe& probe)
+{
+	Camera* camera = Camera::current;
+	GFX::Shader* shader = GFX::Shader::Get("spherical_probe");
+	shader->enable();
+
+	Matrix44 model;
+	model.setTranslation(probe.pos.x, probe.pos.y, probe.pos.z);
+	model.scale(10, 10, 10);
+
+	shader->setUniform("u_model", model);
+	shader->setUniform3Array("u_coeffs", probe.sh.coeffs[0].v, 9);
+
+	cameraToShader(camera, shader);
+
+
+	sphere.render(GL_TRIANGLES);
+}
+
 void SCN::Renderer::renderMeshWithMaterialGBuffers(const Matrix44 model, GFX::Mesh* mesh, SCN::Material* material)
 {
 	//in case there is nothing to do
@@ -884,6 +947,8 @@ void Renderer::renderDeferred(Scene* scene, Camera* camera)
 	}
 	glDisable(GL_BLEND);
 	shader->disable();
+	glEnable(GL_DEPTH_TEST);
+	renderProbe(probe);
 	light_fbo->unbind();
 
 	
@@ -1042,6 +1107,11 @@ void Renderer::showUI()
 	if(render_mode==eRenderMode::DEFERRED)
 		ImGui::Checkbox("Show gbuffers", &show_gbuffers);
 
+
+	if (ImGui::Button("Update Probes"))
+	{
+		captureProbe(probe);
+	}
 	//add here your stuff
 	//...
 }

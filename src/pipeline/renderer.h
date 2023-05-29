@@ -1,6 +1,7 @@
 #pragma once
 #include "scene.h"
 #include "prefab.h"
+#include "../gfx/sphericalharmonics.h"
 
 #include "light.h"
 
@@ -77,6 +78,16 @@ namespace SCN {
 
 		GFX::FBO* light_fbo;
 		GFX::FBO* ssao_fbo;
+		GFX::FBO* irr_fbo;
+
+		struct sProbe {
+			vec3 pos; //where is located
+			vec3 local; //its ijk pos in the matrix
+			int index; //its index in the linear array
+			SphericalHarmonics sh; //coeffs
+		};
+		sProbe probe;
+
 
 		float tonemapper_scale; //color scale before tonemapper
 		float average_lum;
@@ -119,6 +130,9 @@ namespace SCN {
 		void renderMeshWithMaterialFlat(const Matrix44 model, GFX::Mesh* mesh, SCN::Material* material);
 
 		void renderMeshWithMaterialLightSinglePass(const Matrix44 model, GFX::Mesh* mesh, SCN::Material* material);
+
+		void captureProbe(sProbe& probe);
+		void renderProbe(sProbe& probe);
 
 		void showUI();
 
