@@ -21,8 +21,10 @@ namespace SCN {
 
 	enum eRenderMode {
 		FLAT,
+		TEXTURED,
 		LIGHTMULTIPASS,
-		LIGHTSINGLEPASS
+		LIGHTSINGLEPASS,
+		DEFERRED
 	};
 
 	// This class is in charge of rendering anything in our system.
@@ -33,6 +35,9 @@ namespace SCN {
 		bool render_wireframe;
 		bool render_boundaries;
 		eRenderMode render_mode;
+
+		//Debug parameters
+		bool show_shadowmap;
 
 		GFX::Texture* skybox_cubemap;
 
@@ -46,7 +51,7 @@ namespace SCN {
 		Renderer(const char* shaders_atlas_filename );
 
 		//just to be sure we have everything ready for the rendering
-		void setupScene();
+		void setupScene(Camera* camera);
 
 		//add here your functions
 		//...
@@ -59,14 +64,46 @@ namespace SCN {
 				float distance_to_camera;
 		};
 
-		std::vector<RenderCall> renderCalls;
+		std::vector<RenderCall> opaqueRenderCalls;
+		std::vector<RenderCall> transparentRenderCalls;
+
+		bool show_shadows;
+		bool normal_maps;
+		int shininess_coef;
+		bool show_gbuffers;
+
+		GFX::FBO* shadow_atlas_fbo;
+		int max_shadowmaps_pow2 = 2;
+
+		GFX::FBO* light_fbo;
+		GFX::FBO* ssao_fbo;
+
+		float tonemapper_scale; //color scale before tonemapper
+		float average_lum;
+		float lumwhite2;
+		float igamma; //inverse gamma
+
+		GFX::Texture* current_shadow_texture;
 
 		float distance(vec3 p1, vec3 p2);
+		
 		
 
 
 		//renders several elements of the scene
 		void renderScene(SCN::Scene* scene, Camera* camera);
+		void renderFrame(SCN::Scene* scene, Camera* camera);
+		void renderForward(SCN::Scene* scene, Camera* camera);
+		void renderDeferred(Scene* scene, Camera* camera);
+		void renderRenderCalls(SCN::Scene* scene, Camera* camera);
+
+		void lightToShader(LightEntity* light, GFX::Shader* shader);
+
+
+
+		void renderMeshWithMaterialGBuffers(const Matrix44 model, GFX::Mesh* mesh, SCN::Material* material);
+
+		void  generateShadowMaps();
 
 		//render the skybox
 		void renderSkybox(GFX::Texture* cubemap);
@@ -79,11 +116,16 @@ namespace SCN {
 		//Add all the lights of the scene
 		void renderMeshWithMaterialLight(const Matrix44 model, GFX::Mesh* mesh, SCN::Material* material);
 
+		void renderMeshWithMaterialFlat(const Matrix44 model, GFX::Mesh* mesh, SCN::Material* material);
+
 		void renderMeshWithMaterialLightSinglePass(const Matrix44 model, GFX::Mesh* mesh, SCN::Material* material);
 
 		void showUI();
 
 		void cameraToShader(Camera* camera, GFX::Shader* shader); //sends camera uniforms to shader
+
+		//Debug
+		void debug_shadowmap();
 	};
 
 };

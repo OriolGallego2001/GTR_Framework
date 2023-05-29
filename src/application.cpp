@@ -61,7 +61,7 @@ void Application::render(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//set the camera as default (used by some functions in the framework)
-	camera->enable();
+	
 
 	//render the whole scene
 	renderer->renderScene(scene, camera);
@@ -69,7 +69,7 @@ void Application::render(void)
 	//Draw the floor grid, helpful to have a reference point
 	if (render_debug)
 	{
-		GFX::drawGrid();
+		//GFX::drawGrid();
 
 		//render debug points 
 		glDisable(GL_DEPTH_TEST);
