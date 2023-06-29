@@ -77,6 +77,11 @@ namespace SCN {
 
 		GFX::FBO* light_fbo;
 		GFX::FBO* ssao_fbo;
+		GFX::FBO* volumetric_fbo;
+		GFX::FBO* gbuffers_fbo;
+
+		float air_density;
+		bool show_volumetric;
 
 		float tonemapper_scale; //color scale before tonemapper
 		float average_lum;

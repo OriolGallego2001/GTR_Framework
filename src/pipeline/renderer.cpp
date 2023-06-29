@@ -23,11 +23,12 @@ using namespace SCN;
 //some globals
 GFX::Mesh sphere;
 
-GFX::FBO* gbuffers_fbo = nullptr;
 GFX::FBO* illumination_fbo = nullptr;
 
 Renderer::Renderer(const char* shader_atlas_filename)
 {
+	show_volumetric = false;
+	air_density = 0.001;
 	render_wireframe = false;
 	render_boundaries = false;
 	show_gbuffers = false;
@@ -37,6 +38,7 @@ Renderer::Renderer(const char* shader_atlas_filename)
 	show_shadowmap = false;
 	show_shadows = true;
 	normal_maps = true;
+	gbuffers_fbo = nullptr;
 	shininess_coef = 10;
 	shadow_atlas_fbo = new GFX::FBO();
 	shadow_atlas_fbo->setDepthOnly(1024* max_shadowmaps_pow2, 1024* max_shadowmaps_pow2);
@@ -791,6 +793,9 @@ void Renderer::renderDeferred(Scene* scene, Camera* camera)
 	{
 		gbuffers_fbo = new GFX::FBO();
 		gbuffers_fbo->create(size.x, size.y, 3, GL_RGBA, GL_UNSIGNED_BYTE, true);
+
+		volumetric_fbo = new GFX::FBO();
+		volumetric_fbo->create(size.x, size.y, 1, GL_RGB, GL_UNSIGNED_BYTE,false);
 	}
 	gbuffers_fbo->bind();
 
@@ -804,22 +809,28 @@ void Renderer::renderDeferred(Scene* scene, Camera* camera)
 	gbuffers_fbo->unbind();
 
 
-	/*
-	ssao_fbo->bind();
+
+	volumetric_fbo->bind();
+
+
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
-	shader = GFX::Shader::Get("ssao");
+	shader = GFX::Shader::Get("volumetric");
 	shader->enable();
 
-	shader->setTexture("u_normal_texture", gbuffers_fbo->color_textures[1], 1);
-	shader->setTexture("u_depth_texture", gbuffers_fbo->depth_texture, 3);
-	shader->setUniform("u_iRes", vec2(1 / size.x, 1 / size.y));
-	shader->setUniform("u_inv_viewproj", camera->inverse_viewprojection_matrix);
-	quad->render(GL_TRIANGLES);
 
-	ssao_fbo->unbind();
-	ssao_fbo->color_textures[0]->toViewport();
-	*/
+	shader->setTexture("u_depth_texture", gbuffers_fbo->depth_texture, 3);
+	shader->setUniform("u_camera_position", camera->eye);
+	shader->setUniform("u_iRes", vec2(1 / size.x, 1 / size.y));
+	shader->setUniform("u_ivp", camera->inverse_viewprojection_matrix);
+	shader->setUniform("u_air_density", air_density);
+
+	LightEntity* spot = lights[0];
+
+	lightToShader(spot, shader);
+
+	quad->render(GL_TRIANGLES);
+	volumetric_fbo->unbind();
 
 	light_fbo->bind();
 	camera->enable();
@@ -886,7 +897,8 @@ void Renderer::renderDeferred(Scene* scene, Camera* camera)
 	shader->disable();
 	light_fbo->unbind();
 
-	
+	if (show_volumetric)
+		volumetric_fbo->color_textures[0]->toViewport();
 
 	if (show_gbuffers)
 	{
@@ -1041,6 +1053,9 @@ void Renderer::showUI()
 	ImGui::Combo("Render Mode", (int*) & render_mode, "FLAT\0TEXTURED\0LIGHTSMULTIPASS\0LIGHTSSINGLEPASS\0DEFERRED\0", 2);
 	if(render_mode==eRenderMode::DEFERRED)
 		ImGui::Checkbox("Show gbuffers", &show_gbuffers);
+	ImGui::Checkbox("Show volumetric", &show_volumetric);
+	ImGui::DragFloat("Air density", &air_density, 0.0001, 0.0001, 0.1);
+
 
 	//add here your stuff
 	//...
