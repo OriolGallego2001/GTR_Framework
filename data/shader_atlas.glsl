@@ -15,6 +15,9 @@ volumetric quad.vs volumetric.fs
 deferred_global quad.vs deferred_global.fs
 deferred_light basic.vs deferred_light.fs
 
+spherical_probe basic.vs spherical_probe.fs
+irradiance basic.vs irradiance.fs
+
 \basic.vs
 
 #version 330 core
