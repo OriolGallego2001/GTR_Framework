@@ -3,6 +3,7 @@
 #include "prefab.h"
 
 #include "light.h"
+#include "../gfx/sphericalharmonics.h"
 
 
 //forward declarations
@@ -63,6 +64,38 @@ namespace SCN {
 				
 				float distance_to_camera;
 		};
+
+
+
+		GFX::FBO* irr_fbo;
+		bool show_probes;
+		struct sProbe {
+			vec3 pos; //where is located
+			vec3 local; //its ijk pos in the matrix
+			int index; //its index in the linear array
+			SphericalHarmonics sh; //coeffs
+		};
+		std::vector<sProbe> probes;
+
+
+		struct sIrradianceCacheInfo {
+			int num_probes;
+			vec3 dims;
+			vec3 start;
+			vec3 end;
+		};
+		sIrradianceCacheInfo irrCacheInfo;
+		float irradiance_multiplier;
+
+		void captureProbe(sProbe& probe);
+		void renderProbe(sProbe& probe);
+		void captureIrradiance();
+		void loadIrradianceCache();
+		void applyIrradiance();
+		void uploadIrradianceCache();
+		GFX::Texture* probes_texture;
+
+
 
 		std::vector<RenderCall> opaqueRenderCalls;
 		std::vector<RenderCall> transparentRenderCalls;

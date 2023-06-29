@@ -56,12 +56,20 @@ Renderer::Renderer(const char* shader_atlas_filename)
 	ssao_fbo = new GFX::FBO();
 	ssao_fbo->create(size.x, size.y, 1, GL_RGB, GL_UNSIGNED_BYTE, false);
 
+	irr_fbo = new GFX::FBO();
+	irr_fbo->create(64, 64, 1, GL_RGB, GL_FLOAT, false);
+
 	if (!GFX::Shader::LoadAtlas(shader_atlas_filename))
 		exit(1);
 	GFX::checkGLErrors();
 
 	sphere.createSphere(1.0f);
 	sphere.uploadToVRAM();
+
+
+	irradiance_multiplier = 1.0;
+	show_probes = false;
+	probes_texture = nullptr;
 }
 
 void Renderer::setupScene(Camera* camera)
@@ -948,6 +956,232 @@ void Renderer::renderDeferred(Scene* scene, Camera* camera)
 
 }
 
+void SCN::Renderer::captureIrradiance()
+{
+
+
+	//when computing the probes position…
+
+	//define the corners of the axis aligned grid
+	//this can be done using the boundings of our scene
+	vec3 start_pos(-300, 5, -400);
+	vec3 end_pos(300, 150, 400);
+
+	//define how many probes you want per dimension
+	vec3 dim(10, 4, 10);
+
+	//compute the vector from one corner to the other
+	vec3 delta = (end_pos - start_pos);
+
+	//and scale it down according to the subdivisions
+	//we substract one to be sure the last probe is at end pos
+	delta.x /= (dim.x - 1);
+	delta.y /= (dim.y - 1);
+	delta.z /= (dim.z - 1);
+
+	//now delta give us the distance between probes in every axis
+	probes.resize(dim.x * dim.y * dim.z);
+	//lets compute the centers
+	//pay attention at the order at which we add them
+	for (int z = 0; z < dim.z; ++z)
+		for (int y = 0; y < dim.y; ++y)
+			for (int x = 0; x < dim.x; ++x)
+			{
+				sProbe p;
+				p.local.set(x, y, z);
+
+				//index in the linear array
+				p.index = x + y * dim.x + z * dim.x * dim.y;
+
+				//and its position
+				p.pos = start_pos + delta * vec3(x, y, z);
+				probes[p.index] = p;
+			}
+
+
+	//now compute the coeffs for every probe
+	for (int iP = 0; iP < probes.size(); ++iP)
+	{
+		int probe_index = iP;
+		sProbe& p = probes[iP];
+		captureProbe(p);
+		//...
+	}
+
+
+	FILE* f = fopen("irradiance_cache.bin", "wb");
+	if (f == NULL)
+		return;
+
+	irrCacheInfo.dims = dim;
+	irrCacheInfo.start = start_pos;
+	irrCacheInfo.end = end_pos;
+	irrCacheInfo.num_probes = probes.size();
+	fwrite(&irrCacheInfo, sizeof(irrCacheInfo), 1, f);
+	fwrite(&probes[0], sizeof(sProbe), probes.size(), f);
+
+	fclose(f);
+	uploadIrradianceCache();
+}
+
+void SCN::Renderer::loadIrradianceCache()
+{
+	FILE* f = fopen("irradiance_cache.bin", "rb");
+	if (f == NULL)
+		return;
+
+	fread(&irrCacheInfo, sizeof(sIrradianceCacheInfo), 1, f);
+	probes.resize(irrCacheInfo.num_probes);
+	fread(&probes[0], sizeof(sProbe), irrCacheInfo.num_probes, f);
+
+	fclose(f);
+
+	uploadIrradianceCache();
+}
+
+
+void SCN::Renderer::captureProbe(sProbe& probe)
+{
+	render_mode = eRenderMode::LIGHTMULTIPASS;
+
+	FloatImage images[6]; //here we will store the six views
+	Camera cam;
+	//set the fov to 90 and the aspect to 1
+	cam.setPerspective(90, 1, 0.1, 1000);
+
+	if (!irr_fbo)
+	{
+		irr_fbo = new GFX::FBO();
+		irr_fbo->create(64, 64, 1, GL_RGB, GL_FLOAT, false);
+	}
+
+	for (int i = 0; i < 6; ++i) //for every cubemap face
+	{
+		//compute camera orientation using defined vectors
+		vec3 eye = probe.pos;
+		vec3 front = cubemapFaceNormals[i][2];
+		vec3 center = probe.pos + front;
+		vec3 up = cubemapFaceNormals[i][1];
+		cam.lookAt(eye, center, up);
+		cam.enable();
+
+		//render the scene from this point of view
+		irr_fbo->bind();
+		renderForward(scene, &cam);
+		irr_fbo->unbind();
+
+		//read the pixels back and store in a FloatImage
+		images[i].fromTexture(irr_fbo->color_textures[0]);
+	}
+	render_mode = eRenderMode::DEFERRED;
+	//compute the coefficients given the six images
+	probe.sh = computeSH(images);
+
+}
+
+void SCN::Renderer::renderProbe(sProbe& probe)
+{
+	Camera* camera = Camera::current;
+	GFX::Shader* shader = GFX::Shader::Get("spherical_probe");
+	shader->enable();
+
+	glEnable(GL_CULL_FACE);
+	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+
+	Matrix44 model;
+	model.setTranslation(probe.pos.x, probe.pos.y, probe.pos.z);
+	model.scale(10, 10, 10);
+
+	shader->setUniform("u_model", model);
+	shader->setUniform3Array("u_coeffs", probe.sh.coeffs[0].v, 9);
+
+	cameraToShader(camera, shader);
+
+
+	sphere.render(GL_TRIANGLES);
+}
+void SCN::Renderer::uploadIrradianceCache()
+{
+	if (probes_texture)
+		delete probes_texture;
+
+	vec3 dim = irrCacheInfo.dims;
+
+	//create the texture to store the probes (do this ONCE!!!)
+	probes_texture = new GFX::Texture(
+		9, //9 coefficients per probe
+		probes.size(), //as many rows as probes
+		GL_RGB, //3 channels per coefficient
+		GL_FLOAT); //they require a high range
+
+		//we must create the color information for the texture. because every SH are 27 floats in the RGB,RGB,... order, we can create an array of SphericalHarmonics and use it as pixels of the texture
+	SphericalHarmonics* sh_data = NULL;
+	sh_data = new SphericalHarmonics[dim.x * dim.y * dim.z];
+
+	//here we fill the data of the array with our probes in x,y,z order
+	for (int i = 0; i < probes.size(); ++i)
+		sh_data[i] = probes[i].sh;
+
+	//now upload the data to the GPU as a texture
+	probes_texture->upload(GL_RGB, GL_FLOAT, false, (uint8*)sh_data);
+
+	//disable any texture filtering when reading
+	probes_texture->bind();
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	//always free memory after allocating it!!!
+	delete[] sh_data;
+
+}
+
+void SCN::Renderer::applyIrradiance()
+{
+	if (!probes_texture)
+		return;
+	GFX::Mesh* mesh = GFX::Mesh::getQuad();
+	Camera* camera = Camera::current;
+	vec2 size = CORE::getWindowSize();
+
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	GFX::Shader* shader = GFX::Shader::Get("irradiance");
+	shader->enable();
+
+	shader->setTexture("u_normal_texture", gbuffers_fbo->color_textures[1], 1);
+	shader->setTexture("u_depth_texture", gbuffers_fbo->depth_texture, 3);
+	shader->setTexture("u_albedo_texture", gbuffers_fbo->color_textures[0], 0);
+	shader->setUniform("u_iRes", vec2(1 / size.x, 1 / size.y));
+	shader->setUniform("u_ivp", camera->inverse_viewprojection_matrix);
+	shader->setUniform("u_camera_position", camera->eye);
+
+	//compute the vector from one corner to the other
+	vec3 delta = (irrCacheInfo.end - irrCacheInfo.start);
+
+	//and scale it down according to the subdivisions
+	//we substract one to be sure the last probe is at end pos
+	delta.x /= (irrCacheInfo.dims.x - 1);
+	delta.y /= (irrCacheInfo.dims.y - 1);
+	delta.z /= (irrCacheInfo.dims.z - 1);
+
+	//probes
+	shader->setUniform("u_irr_start", irrCacheInfo.start);
+	shader->setUniform("u_irr_end", irrCacheInfo.end);
+	shader->setUniform("u_irr_dims", irrCacheInfo.dims);
+	shader->setUniform("u_irr_delta", delta);
+
+	shader->setUniform("u_irr_normal_distance", .1f);
+	shader->setTexture("u_probe_texture", probes_texture, 4);
+	shader->setUniform("u_num_probes", irrCacheInfo.num_probes);
+	shader->setUniform("u_num_probes", irrCacheInfo.num_probes);
+	shader->setUniform("u_irr_multiplier", irradiance_multiplier);
+
+	mesh->render(GL_TRIANGLES);
+
+
+}
 
 void Renderer::debug_shadowmap(){
 	glDisable(GL_DEPTH_TEST);
@@ -1068,14 +1302,22 @@ void Renderer::showUI()
 	ImGui::SliderFloat("Igamma coeficient", &igamma, 0, 2);
 
 	ImGui::Combo("Render Mode", (int*) & render_mode, "FLAT\0TEXTURED\0LIGHTSMULTIPASS\0LIGHTSSINGLEPASS\0DEFERRED\0", 2);
-	if(render_mode==eRenderMode::DEFERRED)
-		ImGui::Checkbox("Show gbuffers", &show_gbuffers);
 	ImGui::Checkbox("Show volumetric", &show_volumetric);
 	ImGui::DragFloat("Air density", &air_density, 0.0001, 0.0001, 0.1);
+	if(render_mode==eRenderMode::DEFERRED)
+		ImGui::Checkbox("Show gbuffers", &show_gbuffers);
+		ImGui::Checkbox("Show probes", &show_probes);
 
+	if (ImGui::Button("Update Probes"))
+	{
+		captureIrradiance();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Load Probes"))
+	{
+		loadIrradianceCache();
+	}
 
-	//add here your stuff
-	//...
 }
 
 #else
