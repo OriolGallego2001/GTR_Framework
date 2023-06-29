@@ -21,9 +21,8 @@ using namespace SCN;
 
 //some globals
 GFX::Mesh sphere;
+GFX::Mesh cube;
 
-GFX::FBO* gbuffers_fbo = nullptr;
-GFX::FBO* illumination_fbo = nullptr;
 
 
 
@@ -37,8 +36,15 @@ Renderer::Renderer(const char* shader_atlas_filename)
 	render_mode = eRenderMode::DEFERRED;
 	show_shadowmap = false;
 	show_shadows = true;
+	show_probes = false;
+	probes_texture = nullptr;
+	gbuffers_fbo = nullptr;
 	normal_maps = true;
 	shininess_coef = 10;
+	irrCacheInfo.num_probes = 0;
+	irradiance_multiplier = 1.0;
+	show_volumetric = false;
+
 	shadow_atlas_fbo = new GFX::FBO();
 	shadow_atlas_fbo->setDepthOnly(1024* max_shadowmaps_pow2, 1024* max_shadowmaps_pow2);
 	current_shadow_texture = shadow_atlas_fbo->depth_texture;
@@ -55,6 +61,8 @@ Renderer::Renderer(const char* shader_atlas_filename)
 	ssao_fbo = new GFX::FBO();
 	ssao_fbo->create(size.x, size.y, 1, GL_RGB, GL_UNSIGNED_BYTE, false);
 	irr_fbo = nullptr;
+	volumetric_fbo = nullptr;
+	air_density = 0.1f;
 
 	if (!GFX::Shader::LoadAtlas(shader_atlas_filename))
 		exit(1);
@@ -62,9 +70,94 @@ Renderer::Renderer(const char* shader_atlas_filename)
 
 	sphere.createSphere(1.0f);
 	sphere.uploadToVRAM();
+	/*
+	cube.createCube(vec3(1.0f));
+	cube.uploadToVRAM();
+	*/
 
-	probe.pos.set(65, 65, 65);
-	probe.sh.coeffs[0].set(1, 0, 0);
+}
+
+void SCN::Renderer::captureIrradiance()
+{
+	
+
+	//when computing the probes position…
+
+	//define the corners of the axis aligned grid
+	//this can be done using the boundings of our scene
+	vec3 start_pos(-300, 5, -400);
+	vec3 end_pos(300, 150, 400);
+
+	//define how many probes you want per dimension
+	vec3 dim(10, 4, 10);
+
+	//compute the vector from one corner to the other
+	vec3 delta = (end_pos - start_pos);
+
+	//and scale it down according to the subdivisions
+	//we substract one to be sure the last probe is at end pos
+	delta.x /= (dim.x - 1);
+	delta.y /= (dim.y - 1);
+	delta.z /= (dim.z - 1);
+
+	//now delta give us the distance between probes in every axis
+	probes.resize(dim.x * dim.y * dim.z);
+	//lets compute the centers
+	//pay attention at the order at which we add them
+	for (int z = 0; z < dim.z; ++z)
+		for (int y = 0; y < dim.y; ++y)
+			for (int x = 0; x < dim.x; ++x)
+			{
+				sProbe p;
+				p.local.set(x, y, z);
+
+				//index in the linear array
+				p.index = x + y * dim.x + z * dim.x * dim.y;
+
+				//and its position
+				p.pos = start_pos + delta * vec3(x, y, z);
+				probes[p.index] = p;
+			}
+
+	
+	//now compute the coeffs for every probe
+	for (int iP = 0; iP < probes.size(); ++iP)
+	{
+		int probe_index = iP;
+		sProbe& p = probes[iP];
+		captureProbe(p);
+		//...
+	}
+	
+
+	FILE* f = fopen("irradiance_cache.bin", "wb");
+	if (f == NULL)
+		return;
+	
+	irrCacheInfo.dims = dim;
+	irrCacheInfo.start = start_pos;
+	irrCacheInfo.end = end_pos;
+	irrCacheInfo.num_probes = probes.size();
+	fwrite(&irrCacheInfo, sizeof(irrCacheInfo), 1, f);
+	fwrite(&probes[0], sizeof(sProbe), probes.size(), f);
+	
+	fclose(f);
+	uploadIrradianceCache();
+}
+
+void SCN::Renderer::loadIrradianceCache()
+{
+	FILE* f = fopen("irradiance_cache.bin", "rb");
+	if (f == NULL)
+		return;
+	
+	fread(&irrCacheInfo, sizeof(sIrradianceCacheInfo), 1, f);
+	probes.resize(irrCacheInfo.num_probes);
+	fread(&probes[0], sizeof(sProbe), irrCacheInfo.num_probes, f);
+	
+	fclose(f);
+
+	uploadIrradianceCache();
 }
 
 void Renderer::setupScene(Camera* camera)
@@ -94,6 +187,9 @@ void Renderer::setupScene(Camera* camera)
 		}
 		else if (ent->getType() == eEntityType::LIGHT) {
 			lights.push_back((SCN::LightEntity*)ent);
+		}
+		else if (ent->getType() == eEntityType::DECAL) {
+			decals.push_back((SCN::DecalEntity*)ent);
 		}
 	}
 
@@ -163,8 +259,8 @@ void Renderer::renderForward(SCN::Scene* scene, Camera* camera)
 	GFX::checkGLErrors();
 
 	//render skybox
-	if (skybox_cubemap && render_mode == eRenderMode::FLAT)
-		renderSkybox(skybox_cubemap);
+	if (skybox_cubemap)
+		renderSkybox(skybox_cubemap, scene->skybox_intensity);
 
 	renderRenderCalls(scene, camera);
 }
@@ -243,7 +339,7 @@ void SCN::Renderer::lightToShader(LightEntity* light, GFX::Shader* shader)
 	}
 }
 
-void Renderer::renderSkybox(GFX::Texture* cubemap)
+void Renderer::renderSkybox(GFX::Texture* cubemap, float skybox_intenisty)
 {
 	Camera* camera = Camera::current;
 
@@ -264,6 +360,7 @@ void Renderer::renderSkybox(GFX::Texture* cubemap)
 	shader->setUniform("u_model", m);
 	cameraToShader(camera, shader);
 	shader->setUniform("u_texture", cubemap, 0);
+	shader->setUniform("u_skybox_intensity", skybox_intenisty);
 	sphere.render(GL_TRIANGLES);
 	shader->disable();
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -516,6 +613,7 @@ void Renderer::renderMeshWithMaterialLight(const Matrix44 model, GFX::Mesh* mesh
 	shader->setUniform("u_normalmap_texture", normal_maps?normalmap_texture : white_texture);
 	shader->setUniform("u_roughness", material->roughness_factor);
 	shader->setUniform("u_metalness", material->metallic_factor);
+	shader->setTexture("u_enviroment", skybox_cubemap, 5);
 
 
 	//this is used to say which is the alpha threshold to what we should not paint a pixel on the screen (to cut polygons according to texture alpha)
@@ -710,7 +808,7 @@ void SCN::Renderer::captureProbe(sProbe& probe)
 	if (!irr_fbo)
 	{
 		irr_fbo = new GFX::FBO();
-		irr_fbo->create(64, 64, 1,GL_RGB, GL_FLOAT);
+		irr_fbo->create(64, 64, 1,GL_RGB, GL_FLOAT, false);
 	}
 
 	for (int i = 0; i < 6; ++i) //for every cubemap face
@@ -743,6 +841,10 @@ void SCN::Renderer::renderProbe(sProbe& probe)
 	GFX::Shader* shader = GFX::Shader::Get("spherical_probe");
 	shader->enable();
 
+	glEnable(GL_CULL_FACE);
+	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+
 	Matrix44 model;
 	model.setTranslation(probe.pos.x, probe.pos.y, probe.pos.z);
 	model.scale(10, 10, 10);
@@ -754,6 +856,87 @@ void SCN::Renderer::renderProbe(sProbe& probe)
 
 
 	sphere.render(GL_TRIANGLES);
+}
+void SCN::Renderer::uploadIrradianceCache()
+{
+	if (probes_texture)
+		delete probes_texture;
+
+	vec3 dim = irrCacheInfo.dims;
+
+	//create the texture to store the probes (do this ONCE!!!)
+	probes_texture = new GFX::Texture(
+		9, //9 coefficients per probe
+		probes.size(), //as many rows as probes
+		GL_RGB, //3 channels per coefficient
+		GL_FLOAT); //they require a high range
+
+		//we must create the color information for the texture. because every SH are 27 floats in the RGB,RGB,... order, we can create an array of SphericalHarmonics and use it as pixels of the texture
+	SphericalHarmonics* sh_data = NULL;
+	sh_data = new SphericalHarmonics[dim.x * dim.y * dim.z];
+
+	//here we fill the data of the array with our probes in x,y,z order
+	for (int i = 0; i < probes.size(); ++i)
+		sh_data[i] = probes[i].sh;
+
+	//now upload the data to the GPU as a texture
+	probes_texture->upload(GL_RGB, GL_FLOAT, false, (uint8*)sh_data);
+
+	//disable any texture filtering when reading
+	probes_texture->bind();
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	//always free memory after allocating it!!!
+	delete[] sh_data;
+
+}
+
+void SCN::Renderer::applyIrradiance()
+{
+	if (!probes_texture)
+		return;
+	GFX::Mesh* mesh = GFX::Mesh::getQuad();
+	Camera* camera = Camera::current;
+	vec2 size = CORE::getWindowSize();
+
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	GFX::Shader* shader = GFX::Shader::Get("irradiance");
+	shader->enable();
+
+	shader->setTexture("u_normal_texture", gbuffers_fbo->color_textures[1], 1);
+	shader->setTexture("u_depth_texture", gbuffers_fbo->depth_texture, 3);
+	shader->setTexture("u_albedo_texture", gbuffers_fbo->color_textures[0], 0);
+	shader->setUniform("u_iRes", vec2(1 / size.x, 1 / size.y));
+	shader->setUniform("u_ivp", camera->inverse_viewprojection_matrix);
+	shader->setUniform("u_camera_position", camera->eye);
+
+	//compute the vector from one corner to the other
+	vec3 delta = (irrCacheInfo.end - irrCacheInfo.start);
+
+	//and scale it down according to the subdivisions
+	//we substract one to be sure the last probe is at end pos
+	delta.x /= (irrCacheInfo.dims.x - 1);
+	delta.y /= (irrCacheInfo.dims.y - 1);
+	delta.z /= (irrCacheInfo.dims.z - 1);
+
+	//probes
+	shader->setUniform("u_irr_start", irrCacheInfo.start);
+	shader->setUniform("u_irr_end", irrCacheInfo.end);
+	shader->setUniform("u_irr_dims", irrCacheInfo.dims);
+	shader->setUniform("u_irr_delta", delta);
+
+	shader->setUniform("u_irr_normal_distance", .1f);
+	shader->setTexture("u_probe_texture", probes_texture,4);
+	shader->setUniform("u_num_probes", irrCacheInfo.num_probes);
+	shader->setUniform("u_num_probes", irrCacheInfo.num_probes);
+	shader->setUniform("u_irr_multiplier", irradiance_multiplier);
+
+	mesh->render(GL_TRIANGLES);
+
+
 }
 
 void SCN::Renderer::renderMeshWithMaterialGBuffers(const Matrix44 model, GFX::Mesh* mesh, SCN::Material* material)
@@ -854,35 +1037,56 @@ void Renderer::renderDeferred(Scene* scene, Camera* camera)
 	{
 		gbuffers_fbo = new GFX::FBO();
 		gbuffers_fbo->create(size.x, size.y, 3, GL_RGBA, GL_UNSIGNED_BYTE, true);
+
+		volumetric_fbo = new GFX::FBO();
+		volumetric_fbo->create(size.x, size.y, 1, GL_RGB, GL_UNSIGNED_BYTE, false);
 	}
 	gbuffers_fbo->bind();
 
 
-	//gbuffers_fbo->enableBuffers(true, false, false, false);
 	glClearColor(scene->background_color.x, scene->background_color.y, scene->background_color.z, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//gbuffers_fbo->enableAllBuffers();
 	camera->enable();
 	renderRenderCalls(scene, camera);
 	gbuffers_fbo->unbind();
 
 
-	/*
-	ssao_fbo->bind();
+
+	volumetric_fbo->bind();
+
+
+	shader = GFX::Shader::Get("volumetric");
+	shader->enable();
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
-	shader = GFX::Shader::Get("ssao");
-	shader->enable();
 
-	shader->setTexture("u_normal_texture", gbuffers_fbo->color_textures[1], 1);
+
 	shader->setTexture("u_depth_texture", gbuffers_fbo->depth_texture, 3);
+	shader->setUniform("u_camera_position", camera->eye);
 	shader->setUniform("u_iRes", vec2(1 / size.x, 1 / size.y));
-	shader->setUniform("u_inv_viewproj", camera->inverse_viewprojection_matrix);
+	shader->setUniform("u_ivp", camera->inverse_viewprojection_matrix);
+	shader->setUniform("u_air_density", air_density);
+
+	LightEntity* spot = lights[0];
+
+	shader->setUniform("u_light_position", spot->root.model.getTranslation());
+	shader->setUniform("u_light_color", spot->color * spot->intensity);
+	shader->setUniform("u_light_info", vec4((int)spot->light_type, spot->near_distance, spot->max_distance, shininess_coef));
+	shader->setUniform("u_light_front", spot->root.model.rotateVector(vec3(0, 0, 1)));
+	if (spot->light_type == eLightType::SPOT)
+		shader->setUniform("u_light_cone", vec2(cos(spot->cone_info.x * DEG2RAD), cos(spot->cone_info.y * DEG2RAD)));
+
+
+	shader->setUniform("u_shadow_info", vec2(spot->shadowmap ? 1 : 0, spot->shadow_bias));
+	if (spot->shadowmap)
+	{
+		shader->setUniform("u_shadowmap", spot->shadowmap, 5);
+		shader->setUniform("u_shadow_viewproj", spot->shadow_viewproj);
+	}
+
 	quad->render(GL_TRIANGLES);
 
-	ssao_fbo->unbind();
-	ssao_fbo->color_textures[0]->toViewport();
-	*/
+	volumetric_fbo->unbind();
 
 	light_fbo->bind();
 	camera->enable();
@@ -892,7 +1096,7 @@ void Renderer::renderDeferred(Scene* scene, Camera* camera)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	if(skybox_cubemap)
-		renderSkybox(skybox_cubemap);
+		renderSkybox(skybox_cubemap, scene->skybox_intensity);
 
 	glDisable(GL_DEPTH_TEST);
 	shader = GFX::Shader::Get("deferred_global");
@@ -909,6 +1113,8 @@ void Renderer::renderDeferred(Scene* scene, Camera* camera)
 
 	shader->disable();
 
+	
+
 	shader = GFX::Shader::Get("deferred_light");
 	shader->enable();
 
@@ -916,6 +1122,8 @@ void Renderer::renderDeferred(Scene* scene, Camera* camera)
 	shader->setTexture("u_normal_texture", gbuffers_fbo->color_textures[1], 1);
 	shader->setTexture("u_extra_texture", gbuffers_fbo->color_textures[2], 2);
 	shader->setTexture("u_depth_texture", gbuffers_fbo->depth_texture, 3);
+	shader->setTexture("u_enviroment", skybox_cubemap, 4);
+	shader->setUniform("u_ambient_light", scene->ambient_light);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
@@ -947,12 +1155,22 @@ void Renderer::renderDeferred(Scene* scene, Camera* camera)
 	}
 	glDisable(GL_BLEND);
 	shader->disable();
+
+	//irradiance
+	applyIrradiance();
+
 	glEnable(GL_DEPTH_TEST);
-	renderProbe(probe);
+
+
+	if (show_probes) {
+		for(int i = 0; i<probes.size(); ++i)
+			renderProbe(probes[i]);
+	}
 	light_fbo->unbind();
 
 	
-
+	
+	
 	if (show_gbuffers)
 	{
 		glViewport(0, size.y / 2, size.x / 2, size.y / 2);
@@ -981,9 +1199,289 @@ void Renderer::renderDeferred(Scene* scene, Camera* camera)
 		light_fbo->color_textures[0]->toViewport(shader);
 
 	}
-
+	if(show_volumetric)
+		volumetric_fbo->color_textures[0]->toViewport();
 }
 
+
+void Renderer::renderDeferredVolumetric(Scene* scene, Camera* camera)
+{
+	vec2 size = CORE::getWindowSize();
+	GFX::Mesh* quad = GFX::Mesh::getQuad();
+	GFX::Shader* shader = nullptr;
+
+	if (!gbuffers_fbo)
+	{
+		gbuffers_fbo = new GFX::FBO();
+		gbuffers_fbo->create(size.x, size.y, 3, GL_RGBA, GL_UNSIGNED_BYTE, true);
+
+		volumetric_fbo = new GFX::FBO();
+		volumetric_fbo->create(size.x, size.y, 1, GL_RGB, GL_UNSIGNED_BYTE, false);
+	}
+	gbuffers_fbo->bind();
+
+
+	gbuffers_fbo->enableBuffers(true, false, false, false);
+	glClearColor(scene->background_color.x, scene->background_color.y, scene->background_color.z, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	gbuffers_fbo->enableAllBuffers();
+	camera->enable();
+	renderRenderCalls(scene, camera);
+	gbuffers_fbo->unbind();
+
+
+
+	volumetric_fbo->bind();
+
+
+	shader = GFX::Shader::Get("volumetric");
+	shader->enable();
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+
+
+	shader->setTexture("u_depth_texture", gbuffers_fbo->depth_texture, 3);
+	shader->setUniform("u_camera_position", camera->eye);
+	shader->setUniform("u_iRes", vec2(1 / size.x, 1 / size.y));
+	shader->setUniform("u_ivp", camera->inverse_viewprojection_matrix);
+	shader->setUniform("u_air_density", air_density);
+
+	LightEntity* spot = lights[0];
+
+	lightToShader(spot, shader);
+
+	quad->render(GL_TRIANGLES);
+	volumetric_fbo->unbind();
+
+	light_fbo->bind();
+	camera->enable();
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+	glClearColor(scene->background_color.x, scene->background_color.y, scene->background_color.z, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	if (skybox_cubemap)
+		renderSkybox(skybox_cubemap, scene->skybox_intensity);
+
+	glDisable(GL_DEPTH_TEST);
+	shader = GFX::Shader::Get("deferred_global");
+	shader->enable();
+
+	shader->setTexture("u_albedo_texture", gbuffers_fbo->color_textures[0], 0);
+	shader->setTexture("u_normal_texture", gbuffers_fbo->color_textures[1], 1);
+	shader->setTexture("u_extra_texture", gbuffers_fbo->color_textures[2], 2);
+	shader->setTexture("u_depth_texture", gbuffers_fbo->depth_texture, 3);
+
+	shader->setUniform("u_ambient_light", scene->ambient_light);
+
+	quad->render(GL_TRIANGLES);
+
+	shader->disable();
+
+	/*
+
+	shader = GFX::Shader::Get("deferred_light");
+	shader->enable();
+
+	shader->setTexture("u_albedo_texture", gbuffers_fbo->color_textures[0], 0);
+	shader->setTexture("u_normal_texture", gbuffers_fbo->color_textures[1], 1);
+	shader->setTexture("u_extra_texture", gbuffers_fbo->color_textures[2], 2);
+	shader->setTexture("u_depth_texture", gbuffers_fbo->depth_texture, 3);
+	shader->setTexture("u_enviroment", skybox_cubemap, 4);
+	shader->setUniform("u_ambient_light", scene->ambient_light);
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
+	shader->setUniform("u_iRes", vec2(1 / size.x, 1 / size.y));
+	shader->setUniform("u_inv_viewproj", camera->inverse_viewprojection_matrix);
+	for (auto light : lights)
+	{
+		if (light->light_type == eLightType::POINT || light->light_type == eLightType::SPOT)
+		{
+			mat4 m;
+			vec3 lightpos = light->root.model.getTranslation();
+			m.setTranslation(lightpos.x, lightpos.y, lightpos.z);
+			m.scale(light->max_distance, light->max_distance, light->max_distance);
+			shader->setUniform("u_model", m);
+			cameraToShader(camera, shader);
+			glFrontFace(GL_CW);
+			lightToShader(light, shader);
+
+			sphere.render(GL_TRIANGLES);
+			glFrontFace(GL_CCW);
+		}
+		else {
+			lightToShader(light, shader);
+			shader->setUniform("u_camera_position", camera->eye);
+			shader->setUniform("u_viewprojection", mat4::IDENTITY);
+			shader->setUniform("u_model", mat4::IDENTITY);
+			quad->render(GL_TRIANGLES);
+		}
+	}
+	glDisable(GL_BLEND);
+	shader->disable();
+
+	//irradiance
+	applyIrradiance();
+
+	glEnable(GL_DEPTH_TEST);
+
+
+	if (show_probes) {
+		for (int i = 0; i < probes.size(); ++i)
+			renderProbe(probes[i]);
+	}
+	*/
+	light_fbo->unbind();
+
+
+
+
+	if (show_gbuffers)
+	{
+		glViewport(0, size.y / 2, size.x / 2, size.y / 2);
+		gbuffers_fbo->color_textures[0]->toViewport();
+		glViewport(size.x / 2, size.y / 2, size.x / 2, size.y / 2);
+		gbuffers_fbo->color_textures[1]->toViewport();
+		glViewport(0, 0, size.x / 2, size.y / 2);
+		gbuffers_fbo->color_textures[2]->toViewport();
+		glViewport(size.x / 2, 0, size.x / 2, size.y / 2);
+		shader = GFX::Shader::getDefaultShader("linear_depth");
+		shader->enable();
+		shader->setUniform("u_camera_nearfar", vec2(camera->near_plane, camera->far_plane));
+		gbuffers_fbo->depth_texture->toViewport(shader);
+		glViewport(0, 0, size.x, size.y);
+		shader->disable();
+	}
+	else
+	{
+		shader = GFX::Shader::Get("tonemapper");
+		shader->enable();
+		shader->setUniform("u_scale", tonemapper_scale); //color scale before tonemapper
+		shader->setUniform("u_average_lum", average_lum);
+		shader->setUniform("u_lumwhite2", lumwhite2);
+		shader->setUniform("u_igamma", 1.0f / igamma); //inverse gamma
+
+		light_fbo->color_textures[0]->toViewport(shader);
+
+	}
+	if (show_volumetric)
+		volumetric_fbo->color_textures[0]->toViewport();
+}
+
+void Renderer::renderWithDecals(Scene* scene, Camera* camera)
+{
+	vec2 size = CORE::getWindowSize();
+	GFX::Mesh* quad = GFX::Mesh::getQuad();
+	GFX::Shader* shader = nullptr;
+
+	if (!gbuffers_fbo)
+	{
+		gbuffers_fbo = new GFX::FBO();
+		gbuffers_fbo->create(size.x, size.y, 3, GL_RGBA, GL_UNSIGNED_BYTE, true);
+
+		volumetric_fbo = new GFX::FBO();
+		volumetric_fbo->create(size.x, size.y, 1, GL_RGB, GL_UNSIGNED_BYTE, false);
+	}
+	gbuffers_fbo->bind();
+
+
+	glClearColor(scene->background_color.x, scene->background_color.y, scene->background_color.z, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	camera->enable();
+	renderRenderCalls(scene, camera);
+	gbuffers_fbo->unbind();
+	/*
+	//allocate memory for the cloned depth texture
+	if (!cloned_depth_texture)
+		cloned_depth_texture = new GFX::Texture(size.x, size.y, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
+
+
+	if (decals.size())
+	{
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_BLEND);
+		glEnable(GL_CULL_FACE);
+		//copy gbuffers depth to other texture
+		gbuffers_fbo->depth_texture->copyTo(cloned_depth_texture);
+
+		//draw again inside the gbuffers
+		gbuffers_fbo->bind();
+
+		camera->enable();
+		//but pass to the shader the cloned depth
+		shader->setUniform("u_depth_texture", cloned_depth_texture);
+		GFX::Shader* decal_shader = GFX::Shader::Get("decals");
+		decal_shader->enable();
+		cameraToShader(camera, shader);
+		shader->setUniform("u_ivp", camera->inverse_viewprojection_matrix);
+		shader->setUniform("u_iRes", vec2(1 / gbuffers_fbo->color_textures[0]->width, 1 / gbuffers_fbo->color_textures[0]->height));
+		shader->setTexture("u_depth_texture", cloned_depth_texture, 4);
+		for (auto decal : decals)
+		{
+			shader->setUniform("u_model", decal->root.model);
+			cube.render(GL_TRIANGLES);
+		}
+
+
+		gbuffers_fbo->unbind();
+
+	}
+
+	*/
+
+	light_fbo->bind();
+	camera->enable();
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+	glClearColor(scene->background_color.x, scene->background_color.y, scene->background_color.z, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	if (skybox_cubemap)
+		renderSkybox(skybox_cubemap, scene->skybox_intensity);
+
+	glDisable(GL_DEPTH_TEST);
+	shader = GFX::Shader::Get("deferred_global");
+	shader->enable();
+
+	shader->setTexture("u_albedo_texture", gbuffers_fbo->color_textures[0], 0);
+	shader->setTexture("u_normal_texture", gbuffers_fbo->color_textures[1], 1);
+	shader->setTexture("u_extra_texture", gbuffers_fbo->color_textures[2], 2);
+	shader->setTexture("u_depth_texture", gbuffers_fbo->depth_texture, 3);
+
+	shader->setUniform("u_ambient_light", scene->ambient_light);
+
+	quad->render(GL_TRIANGLES);
+
+	shader->disable();
+
+	light_fbo->unbind();
+
+
+
+	if (show_gbuffers)
+	{
+		glViewport(0, size.y / 2, size.x / 2, size.y / 2);
+		gbuffers_fbo->color_textures[0]->toViewport();
+		glViewport(size.x / 2, size.y / 2, size.x / 2, size.y / 2);
+		gbuffers_fbo->color_textures[1]->toViewport();
+		glViewport(0, 0, size.x / 2, size.y / 2);
+		gbuffers_fbo->color_textures[2]->toViewport();
+		glViewport(size.x / 2, 0, size.x / 2, size.y / 2);
+		shader = GFX::Shader::getDefaultShader("linear_depth");
+		shader->enable();
+		shader->setUniform("u_camera_nearfar", vec2(camera->near_plane, camera->far_plane));
+		gbuffers_fbo->depth_texture->toViewport(shader);
+		glViewport(0, 0, size.x, size.y);
+		shader->disable();
+	}
+
+	light_fbo->color_textures[0]->toViewport(shader);
+
+	
+	if (show_volumetric)
+		volumetric_fbo->color_textures[0]->toViewport();
+}
 
 void Renderer::debug_shadowmap(){
 	glDisable(GL_DEPTH_TEST);
@@ -1104,14 +1602,27 @@ void Renderer::showUI()
 	ImGui::SliderFloat("Igamma coeficient", &igamma, 0, 2);
 
 	ImGui::Combo("Render Mode", (int*) & render_mode, "FLAT\0TEXTURED\0LIGHTSMULTIPASS\0LIGHTSSINGLEPASS\0DEFERRED\0", 2);
-	if(render_mode==eRenderMode::DEFERRED)
+	if (render_mode == eRenderMode::DEFERRED)
+	{
 		ImGui::Checkbox("Show gbuffers", &show_gbuffers);
+		ImGui::Checkbox("Show probes", &show_probes);
+	}
 
 
 	if (ImGui::Button("Update Probes"))
 	{
-		captureProbe(probe);
+		captureIrradiance();
 	}
+	ImGui::SameLine();
+	if (ImGui::Button("Load Probes"))
+	{
+		loadIrradianceCache();
+	}
+
+	ImGui::SliderFloat("Irradiance multiplier", &irradiance_multiplier, 0, 50);
+	ImGui::DragFloat("Air densitys", &air_density, 0.0001,0.0, 0.1);
+	ImGui::Checkbox("Show volumetric", &show_volumetric);
+
 	//add here your stuff
 	//...
 }

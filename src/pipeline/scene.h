@@ -108,6 +108,18 @@ namespace SCN {
 		bool testRay(const Ray& ray, Vector3f& coll, float max_dist = 100000.0f);
 	};
 
+	//represents one prefab in the scene
+	class DecalEntity : public SCN::BaseEntity
+	{
+	public:
+		std::string filename;
+
+		DecalEntity();
+		ENTITY_METHODS(DecalEntity, PREFAB, 11, 0);
+		virtual void configure(cJSON* json);
+		virtual void serialize(cJSON* json);
+	};
+
 	class UnknownEntity : public SCN::BaseEntity
 	{
 	public:
@@ -131,6 +143,7 @@ namespace SCN {
 
 		Vector3f background_color;
 		Vector3f ambient_light;
+		float skybox_intensity;
 		std::string skybox_filename;
 		Camera main_camera;
 

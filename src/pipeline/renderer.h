@@ -67,11 +67,14 @@ namespace SCN {
 
 		std::vector<RenderCall> opaqueRenderCalls;
 		std::vector<RenderCall> transparentRenderCalls;
+		std::vector<DecalEntity*> decals;
+
 
 		bool show_shadows;
 		bool normal_maps;
 		int shininess_coef;
 		bool show_gbuffers;
+		bool show_probes;
 
 		GFX::FBO* shadow_atlas_fbo;
 		int max_shadowmaps_pow2 = 2;
@@ -79,6 +82,11 @@ namespace SCN {
 		GFX::FBO* light_fbo;
 		GFX::FBO* ssao_fbo;
 		GFX::FBO* irr_fbo;
+		GFX::FBO* volumetric_fbo;
+		GFX::FBO* gbuffers_fbo;
+
+		float air_density;
+		bool show_volumetric;
 
 		struct sProbe {
 			vec3 pos; //where is located
@@ -86,7 +94,17 @@ namespace SCN {
 			int index; //its index in the linear array
 			SphericalHarmonics sh; //coeffs
 		};
-		sProbe probe;
+		std::vector<sProbe> probes;
+
+		
+		struct sIrradianceCacheInfo {
+			int num_probes;
+			vec3 dims;
+			vec3 start;
+			vec3 end;
+		};
+		sIrradianceCacheInfo irrCacheInfo;
+		float irradiance_multiplier;
 
 
 		float tonemapper_scale; //color scale before tonemapper
@@ -95,6 +113,7 @@ namespace SCN {
 		float igamma; //inverse gamma
 
 		GFX::Texture* current_shadow_texture;
+		GFX::Texture* cloned_depth_texture;
 
 		float distance(vec3 p1, vec3 p2);
 		
@@ -107,6 +126,8 @@ namespace SCN {
 		void renderForward(SCN::Scene* scene, Camera* camera);
 		void renderDeferred(Scene* scene, Camera* camera);
 		void renderRenderCalls(SCN::Scene* scene, Camera* camera);
+		void renderDeferredVolumetric(Scene* scene, Camera* camera);
+		void renderWithDecals(Scene* scene, Camera* camera);
 
 		void lightToShader(LightEntity* light, GFX::Shader* shader);
 
@@ -117,7 +138,7 @@ namespace SCN {
 		void  generateShadowMaps();
 
 		//render the skybox
-		void renderSkybox(GFX::Texture* cubemap);
+		void renderSkybox(GFX::Texture* cubemap, float skybox_instensity);
 	
 		//to render one node from the prefab and its children
 		void renderNode(SCN::Node* node, Camera* camera);
@@ -133,6 +154,12 @@ namespace SCN {
 
 		void captureProbe(sProbe& probe);
 		void renderProbe(sProbe& probe);
+		void captureIrradiance();
+		void loadIrradianceCache();
+		void applyIrradiance();
+		void uploadIrradianceCache();
+		GFX::Texture* probes_texture;
+
 
 		void showUI();
 

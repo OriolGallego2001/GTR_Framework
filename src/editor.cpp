@@ -231,6 +231,7 @@ void SceneEditor::render(Camera* camera)
 		switch (ent->getType())
 		{
 		case SCN::eEntityType::PREFAB: inspectEntity((SCN::PrefabEntity*)ent); break;
+		case SCN::eEntityType::DECAL: inspectEntity((SCN::DecalEntity*)ent); break;
 		case SCN::eEntityType::LIGHT: inspectEntity((SCN::LightEntity*)ent); break;
 		case SCN::eEntityType::NONE: inspectEntity((SCN::UnknownEntity*)ent); break;
 		default: inspectEntity(ent); break;
@@ -243,6 +244,7 @@ void SceneEditor::render(Camera* camera)
 
 		if (UI::Filename("Skybox", scene->skybox_filename, scene->base_folder))
 			renderer->setupScene(camera);
+		ImGui::DragFloat("skybox_intensity", &scene->skybox_intensity, 0.1);
 
 		//add info to the debug panel about the camera
 		if (ImGui::TreeNode(camera, "Camera")) {
@@ -342,6 +344,13 @@ void SceneEditor::inspectEntity(SCN::PrefabEntity* entity)
 	}
 
 #endif
+}
+
+void SceneEditor::inspectEntity(SCN::DecalEntity* entity)
+{
+	if (UI::Filename("filename", entity->filename, scene->base_folder))
+	{
+	}
 }
 
 void SceneEditor::inspectEntity(SCN::LightEntity* entity)
