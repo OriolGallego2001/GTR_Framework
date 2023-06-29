@@ -247,18 +247,18 @@ C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framewor
               T=float
           ]
 C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1137,20): warning C4018: '<': no coinciden signed/unsigned
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1268,31): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1272,31): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1268,23): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1272,23): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1298,29): warning C4305: 'argumento': truncamiento de 'double' a 'float'
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1369,67): warning C4305: 'argumento': truncamiento de 'double' a 'float'
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1302,29): warning C4305: 'argumento': truncamiento de 'double' a 'float'
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1373,67): warning C4305: 'argumento': truncamiento de 'double' a 'float'
      Creando biblioteca ..\..\GTR.lib y objeto ..\..\GTR.exp
 LINK : warning LNK4098: la biblioteca predeterminada'LIBCMT' entra en conflicto con otras bibliotecas; use la biblioteca /NODEFAULTLIB:biblioteca
   Generando código

@@ -17,8 +17,8 @@ deferred_light basic.vs deferred_light.fs
 
 spherical_probe basic.vs spherical_probe.fs
 irradiance quad.vs irradiance.fs
-color_correction quad.vs color_correction.fs
-blur quad.vs blur.fs
+fx_color_correction quad.vs color_correction.fs
+fx_blur quad.vs blur.fs
 depthOfField quad.vs depthOfField.fs
 
 \basic.vs
@@ -1417,7 +1417,6 @@ void main() {
 \blur.fs
 #version 330 core
 
-precision highp float;
 in vec2 v_uv;
 out vec4 FragColor;
 

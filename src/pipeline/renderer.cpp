@@ -1162,28 +1162,32 @@ void SCN::Renderer::renderPostEffects(GFX::Texture* color_buffer, GFX::Texture* 
 	GFX::Shader* shader = nullptr;
 
 	postfxOUT_fbo->bind();
-	shader = GFX::Shader::Get("color_correction");
+	shader = GFX::Shader::Get("fx_color_correction");
 	shader->enable();
 	shader->setUniform("u_brightness", 2.0f);
 	color_buffer->toViewport(shader);
 	postfxOUT_fbo->unbind();
 	std::swap(postfxIN_fbo, postfxOUT_fbo);
 
-	shader = GFX::Shader::Get("blur");
+	//BLoom
+	shader = GFX::Shader::Get("fx_blur");
 	shader->enable();
 	shader->setUniform("u_intensity", 1.0f);
 
-	for (int i = 0; i < 5; ++i) {
+	for (int i = 0; i < 10; ++i) {
 
 		shader->setUniform("u_offset", vec2(1.0f / width, 0.0f));
+		shader->setUniform("u_texture", postfxIN_fbo->color_textures[0], 0);
 		postfxOUT_fbo->bind();
-		postfxIN_fbo->color_textures[0]->toViewport(shader);
+		GFX::Mesh::getQuad()->render(GL_TRIANGLES);
 		postfxOUT_fbo->unbind();
 		std::swap(postfxIN_fbo, postfxOUT_fbo);
 
+
 		shader->setUniform("u_offset", vec2(0.0f, 1.0f / height));
+		shader->setUniform("u_texture", postfxIN_fbo->color_textures[0], 0);
 		postfxOUT_fbo->bind();
-		postfxIN_fbo->color_textures[0]->toViewport(shader);
+		GFX::Mesh::getQuad()->render(GL_TRIANGLES);
 		postfxOUT_fbo->unbind();
 		std::swap(postfxIN_fbo, postfxOUT_fbo);
 	}
