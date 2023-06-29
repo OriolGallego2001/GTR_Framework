@@ -95,7 +95,7 @@ namespace SCN {
 		void uploadIrradianceCache();
 		GFX::Texture* probes_texture;
 
-
+		void renderPostEffects(GFX::Texture* color_buffer, GFX::Texture* depth_buffer);
 
 		std::vector<RenderCall> opaqueRenderCalls;
 		std::vector<RenderCall> transparentRenderCalls;
@@ -104,6 +104,10 @@ namespace SCN {
 		bool normal_maps;
 		int shininess_coef;
 		bool show_gbuffers;
+
+		GFX::FBO* postfxIN_fbo;
+		GFX::FBO* postfxOUT_fbo;
+
 
 		GFX::FBO* shadow_atlas_fbo;
 		int max_shadowmaps_pow2 = 2;

@@ -17,6 +17,9 @@ deferred_light basic.vs deferred_light.fs
 
 spherical_probe basic.vs spherical_probe.fs
 irradiance quad.vs irradiance.fs
+color_correction quad.vs color_correction.fs
+blur quad.vs blur.fs
+depthOfField quad.vs depthOfField.fs
 
 \basic.vs
 
@@ -1393,3 +1396,112 @@ void main()
 	color.xyz = max(vec3(0.0), ComputeSHIrradiance(N, sh));
 	FragColor = color;
 }
+
+\color_correction.fs
+#version 330 core
+
+uniform sampler2D u_texture;
+in vec2 v_uv;
+out vec4 FragColor;
+
+uniform float u_brightness;
+
+void main() {
+	vec4 color = texture(u_texture, v_uv);
+	color *= u_brightness;
+	FragColor = color;
+
+}
+
+
+\blur.fs
+#version 330 core
+
+precision highp float;
+in vec2 v_uv;
+out vec4 FragColor;
+
+//linear blur shader of 9 samples
+uniform sampler2D u_texture;
+uniform vec2 u_offset;
+uniform float u_intensity;
+
+
+
+void main() {
+	vec4 sum = vec4(0.0);
+	sum += texture(u_texture, v_uv + u_offset * -4.0) * 0.05 / 0.98;
+	sum += texture(u_texture, v_uv + u_offset * -3.0) * 0.09 / 0.98;
+	sum += texture(u_texture, v_uv + u_offset * -2.0) * 0.12 / 0.98;
+	sum += texture(u_texture, v_uv + u_offset * -1.0) * 0.15 / 0.98;
+	sum += texture(u_texture, v_uv) * 0.16 / 0.98;
+	sum += texture(u_texture, v_uv + u_offset * 4.0) * 0.05 / 0.98;
+	sum += texture(u_texture, v_uv + u_offset * 3.0) * 0.09 / 0.98;
+	sum += texture(u_texture, v_uv + u_offset * 2.0) * 0.12 / 0.98;
+	sum += texture(u_texture, v_uv + u_offset * 1.0) * 0.15 / 0.98;
+	FragColor = u_intensity * sum;
+}
+
+
+
+\depthOfField.fs
+#version 330 core
+
+
+uniform sampler2D u_depth_texture;
+uniform mat4 u_inverse_viewprojection;
+uniform sampler2D focusTexture;
+uniform sampler2D u_texture;
+
+uniform vec2 focusPoint;
+uniform vec2 nearFar;
+
+
+uniform float u_minDistance;
+uniform float u_maxDistance;
+uniform float u_alpha_cutoff;
+
+uniform vec2 u_iRes;
+
+
+out vec4 FragColor;
+
+void main() {
+	float far = nearFar.y;
+
+	vec2 uv = gl_FragCoord.xy * u_iRes.xy;
+
+	float depth = texture(u_depth_texture, uv).x;
+
+	vec4 focusColor = texture(focusTexture, uv);
+	vec4 outOfFocusColor = texture(u_texture, uv);
+
+	FragColor = focusColor;
+
+
+	vec4 screen_position = vec4(uv.x * 2.0 - 1.0, uv.y * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
+	vec4 proj_worldpos = u_inverse_viewprojection * screen_position;
+	vec3 worldpos = proj_worldpos.xyz / proj_worldpos.w;
+
+	//if (proj_worldpos.a <= 0) { FragColor = vec4(1.0); return; }
+	//if(focusColor.a == 0.0f || outOfFocusColor.a==0.0f )
+		  //discard;
+
+
+	vec4 focusPointPos = vec4(focusPoint.x * 2.0 - 1.0, focusPoint.y * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
+	vec4 proj_focuspos = u_inverse_viewprojection * focusPointPos;
+	vec3 focuspos = proj_focuspos.xyz / proj_focuspos.w;
+
+	float blur =
+		smoothstep
+		(u_minDistance
+			, u_maxDistance
+			, length(worldpos - focuspos)
+		);
+
+	FragColor = mix(focusColor, outOfFocusColor, blur);
+
+
+
+}
+

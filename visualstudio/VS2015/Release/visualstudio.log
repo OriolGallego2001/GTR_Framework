@@ -2,249 +2,269 @@
 C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\extra\cJSON.h(104,1): warning C4099: 'cJSON': nombre de tipo visto anteriormente usando 'class' ahora se ve usando 'struct'
 C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\extra\cJSON.h(103): message : vea la declaración de 'cJSON'
 C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(31,22): warning C4305: '=': truncamiento de 'double' a 'float'
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(54,32): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(57,32): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(54,24): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(57,24): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(57,31): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(59,35): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(57,23): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(59,27): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(88,20): warning C4018: '<': no coinciden signed/unsigned
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(109,18): warning C4244: 'return': conversión de 'double' a 'float'; posible pérdida de datos
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(236,109): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(60,36): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(236,52): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(60,28): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(239,81): warning C4244: 'argumento': conversión de 'double' a 'T'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(64,31): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(239,46): warning C4244: 'argumento': conversión de 'double' a 'T'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(64,23): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(242,48): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(95,20): warning C4018: '<': no coinciden signed/unsigned
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(116,18): warning C4244: 'return': conversión de 'double' a 'float'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(243,109): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(324,20): warning C4018: '<': no coinciden signed/unsigned
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(385,10): warning C4244: 'inicializando': conversión de 'long' a 'float'; posible pérdida de datos
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(512,10): warning C4244: 'inicializando': conversión de 'long' a 'float'; posible pérdida de datos
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(544,20): warning C4018: '<': no coinciden signed/unsigned
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(630,10): warning C4244: 'inicializando': conversión de 'long' a 'float'; posible pérdida de datos
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(658,20): warning C4018: '<': no coinciden signed/unsigned
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(664,104): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(243,52): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(664,39): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(246,81): warning C4244: 'argumento': conversión de 'double' a 'T'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(666,68): warning C4244: 'argumento': conversión de 'double' a 'T'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(246,46): warning C4244: 'argumento': conversión de 'double' a 'T'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(666,29): warning C4244: 'argumento': conversión de 'double' a 'T'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(249,48): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(668,46): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(331,20): warning C4018: '<': no coinciden signed/unsigned
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(392,10): warning C4244: 'inicializando': conversión de 'long' a 'float'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(519,10): warning C4244: 'inicializando': conversión de 'long' a 'float'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(551,20): warning C4018: '<': no coinciden signed/unsigned
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(637,10): warning C4244: 'inicializando': conversión de 'long' a 'float'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(665,20): warning C4018: '<': no coinciden signed/unsigned
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(671,104): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(668,36): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(671,39): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(762,10): warning C4244: 'inicializando': conversión de 'long' a 'float'; posible pérdida de datos
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(803,36): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(673,68): warning C4244: 'argumento': conversión de 'double' a 'T'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(803,28): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(673,29): warning C4244: 'argumento': conversión de 'double' a 'T'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(806,38): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(675,46): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(806,30): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(675,36): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(931,21): warning C4018: '<': no coinciden signed/unsigned
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(940,48): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(769,10): warning C4244: 'inicializando': conversión de 'long' a 'float'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(810,36): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(940,36): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(810,28): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(940,24): warning C4244: 'argumento': conversión de 'T' a 'GLint'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(813,38): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(942,57): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(813,30): warning C4244: 'argumento': conversión de 'T' a 'int'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(942,45): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(938,21): warning C4018: '<': no coinciden signed/unsigned
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(947,48): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(942,33): warning C4244: 'argumento': conversión de 'T' a 'GLint'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(947,36): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(942,21): warning C4244: 'argumento': conversión de 'T' a 'GLint'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(947,24): warning C4244: 'argumento': conversión de 'T' a 'GLint'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(944,38): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(949,57): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(944,26): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(949,45): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(946,47): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(949,33): warning C4244: 'argumento': conversión de 'T' a 'GLint'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(946,35): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(949,21): warning C4244: 'argumento': conversión de 'T' a 'GLint'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(946,21): warning C4244: 'argumento': conversión de 'T' a 'GLint'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(951,38): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(951,31): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(951,26): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(951,23): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(953,47): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(995,30): warning C4244: 'argumento': conversión de 'T' a 'const unsigned int'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(953,35): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1003,23): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(953,21): warning C4244: 'argumento': conversión de 'T' a 'GLint'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1003,20): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(958,31): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1003,17): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(958,23): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1006,29): warning C4244: '=': conversión de 'T' a 'int'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(996,30): warning C4244: 'argumento': conversión de 'T' a 'const unsigned int'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1009,44): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1004,23): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1009,41): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1004,20): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1009,38): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1004,17): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1015,22): warning C4018: '<': no coinciden signed/unsigned
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1024,12): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1041,12): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1062,37): warning C4305: 'argumento': truncamiento de 'double' a 'float'
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1132,17): warning C4244: 'inicializando': conversión de 'T' a 'int'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1007,29): warning C4244: '=': conversión de 'T' a 'int'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1136,20): warning C4018: '<': no coinciden signed/unsigned
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1218,31): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1010,44): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1218,23): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1010,41): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
           with
           [
               T=float
           ]
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1248,29): warning C4305: 'argumento': truncamiento de 'double' a 'float'
-C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1319,67): warning C4305: 'argumento': truncamiento de 'double' a 'float'
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1010,38): warning C4244: 'argumento': conversión de 'int' a 'T'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1016,22): warning C4018: '<': no coinciden signed/unsigned
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1025,12): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1042,12): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1063,37): warning C4305: 'argumento': truncamiento de 'double' a 'float'
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1133,17): warning C4244: 'inicializando': conversión de 'T' a 'int'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1137,20): warning C4018: '<': no coinciden signed/unsigned
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1268,31): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1268,23): warning C4244: 'argumento': conversión de 'T' a 'GLsizei'; posible pérdida de datos
+          with
+          [
+              T=float
+          ]
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1298,29): warning C4305: 'argumento': truncamiento de 'double' a 'float'
+C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\src\pipeline\renderer.cpp(1369,67): warning C4305: 'argumento': truncamiento de 'double' a 'float'
      Creando biblioteca ..\..\GTR.lib y objeto ..\..\GTR.exp
 LINK : warning LNK4098: la biblioteca predeterminada'LIBCMT' entra en conflicto con otras bibliotecas; use la biblioteca /NODEFAULTLIB:biblioteca
   Generando código
-  7 of 6056 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
+  2 of 6059 functions (<0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    77 functions had inline decision re-evaluated but remain unchanged
+    64 functions had inline decision re-evaluated but remain unchanged
   Generación de código finalizada
 glew32s.lib(glew.obj) : warning LNK4099: no se encontró PDB 'vc120.pdb' con 'glew32s.lib(glew.obj)' o en 'C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\vc120.pdb'; se vinculará el objeto sin tener en cuenta información de depuración
   visualstudio.vcxproj -> C:\Users\oriol\OneDrive\Documentos\Documents Uni\GraficsEnTempsReal\GTR_Framework\GTR.exe

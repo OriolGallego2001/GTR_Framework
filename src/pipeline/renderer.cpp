@@ -43,6 +43,9 @@ Renderer::Renderer(const char* shader_atlas_filename)
 	shadow_atlas_fbo = new GFX::FBO();
 	shadow_atlas_fbo->setDepthOnly(1024* max_shadowmaps_pow2, 1024* max_shadowmaps_pow2);
 	current_shadow_texture = shadow_atlas_fbo->depth_texture;
+	postfxIN_fbo = new GFX::FBO();
+	postfxOUT_fbo = new GFX::FBO();
+
 
 	tonemapper_scale = 1.0; //color scale before tonemapper
 	average_lum = 1.0;
@@ -52,6 +55,10 @@ Renderer::Renderer(const char* shader_atlas_filename)
 	vec2 size = CORE::getWindowSize();
 	light_fbo = new GFX::FBO();
 	light_fbo->create(size.x, size.y, 1, GL_RGB, GL_HALF_FLOAT);
+
+	postfxIN_fbo->create(size.x, size.y, 1, GL_RGB, GL_HALF_FLOAT);
+	postfxOUT_fbo->create(size.x, size.y, 1, GL_RGB, GL_HALF_FLOAT);
+
 
 	ssao_fbo = new GFX::FBO();
 	ssao_fbo->create(size.x, size.y, 1, GL_RGB, GL_UNSIGNED_BYTE, false);
@@ -953,14 +960,8 @@ void Renderer::renderDeferred(Scene* scene, Camera* camera)
 	}
 	else
 	{
-		shader = GFX::Shader::Get("tonemapper");
-		shader->enable();
-		shader->setUniform("u_scale", tonemapper_scale); //color scale before tonemapper
-		shader->setUniform("u_average_lum",average_lum);
-		shader->setUniform("u_lumwhite2", lumwhite2);
-		shader->setUniform("u_igamma",1.0f/igamma); //inverse gamma
+		renderPostEffects(light_fbo->color_textures[0], light_fbo->depth_texture);
 
-		light_fbo->color_textures[0]->toViewport(shader);
 
 	}
 	if (show_volumetric)
@@ -1146,6 +1147,55 @@ void SCN::Renderer::uploadIrradianceCache()
 
 	//always free memory after allocating it!!!
 	delete[] sh_data;
+
+}
+
+void SCN::Renderer::renderPostEffects(GFX::Texture* color_buffer, GFX::Texture* depth_buffer)
+{
+
+	float height = color_buffer->height;
+	float width = color_buffer->width;
+	postfxIN_fbo->bind();
+	light_fbo->color_textures[0]->toViewport();
+	postfxIN_fbo->unbind();
+
+	GFX::Shader* shader = nullptr;
+
+	postfxOUT_fbo->bind();
+	shader = GFX::Shader::Get("color_correction");
+	shader->enable();
+	shader->setUniform("u_brightness", 2.0f);
+	color_buffer->toViewport(shader);
+	postfxOUT_fbo->unbind();
+	std::swap(postfxIN_fbo, postfxOUT_fbo);
+
+	shader = GFX::Shader::Get("blur");
+	shader->enable();
+	shader->setUniform("u_intensity", 1.0f);
+
+	for (int i = 0; i < 5; ++i) {
+
+		shader->setUniform("u_offset", vec2(1.0f / width, 0.0f));
+		postfxOUT_fbo->bind();
+		postfxIN_fbo->color_textures[0]->toViewport(shader);
+		postfxOUT_fbo->unbind();
+		std::swap(postfxIN_fbo, postfxOUT_fbo);
+
+		shader->setUniform("u_offset", vec2(0.0f, 1.0f / height));
+		postfxOUT_fbo->bind();
+		postfxIN_fbo->color_textures[0]->toViewport(shader);
+		postfxOUT_fbo->unbind();
+		std::swap(postfxIN_fbo, postfxOUT_fbo);
+	}
+
+	shader = GFX::Shader::Get("tonemapper");
+	shader->enable();
+	shader->setUniform("u_scale", tonemapper_scale); //color scale before tonemapper
+	shader->setUniform("u_average_lum", average_lum);
+	shader->setUniform("u_lumwhite2", lumwhite2);
+	shader->setUniform("u_igamma", 1.0f / igamma); //inverse gamma
+
+	color_buffer->toViewport(shader);
 
 }
 
