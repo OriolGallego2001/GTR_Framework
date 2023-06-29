@@ -928,32 +928,8 @@ void Renderer::renderDeferred(Scene* scene, Camera* camera)
 
 
 	if (show_probes) {
-		for (int i = 0; i < probes.size(); ++i)
-		{
-
-			//Camera* camera = Camera::current;
-			//GFX::Shader* shader = GFX::Shader::Get("spherical_probe");
-			shader = GFX::Shader::Get("spherical_probe");
-			shader->enable();
-
-			glEnable(GL_CULL_FACE);
-			glDisable(GL_BLEND);
-			glEnable(GL_DEPTH_TEST);
-			
-			Matrix44 model;
-			model.setTranslation(probes[i].pos.x, probes[i].pos.y, probes[i].pos.z);
-			model.scale(10, 10, 10);
-
-			shader->setUniform("u_model", model);
-			shader->setUniform3Array("u_coeffs", probes[i].sh.coeffs[0].v, 9);
-
-			cameraToShader(camera, shader);
-
-
-			sphere.render(GL_TRIANGLES);
-			
-			//renderProbe(probes[i]);
-		}
+		for (int i = 0; i < probes.size(); ++i)			
+			renderProbe(probes[i]);
 	}
 
 	light_fbo->unbind();
@@ -1153,7 +1129,8 @@ void SCN::Renderer::uploadIrradianceCache()
 
 		//we must create the color information for the texture. because every SH are 27 floats in the RGB,RGB,... order, we can create an array of SphericalHarmonics and use it as pixels of the texture
 	SphericalHarmonics* sh_data = NULL;
-	sh_data = new SphericalHarmonics[dim.x * dim.y * dim.z];
+	int sizeofdata = dim.x * dim.y * dim.z;
+	sh_data = new SphericalHarmonics[sizeofdata];
 
 	//here we fill the data of the array with our probes in x,y,z order
 	for (int i = 0; i < probes.size(); ++i)

@@ -16,7 +16,7 @@ deferred_global quad.vs deferred_global.fs
 deferred_light basic.vs deferred_light.fs
 
 spherical_probe basic.vs spherical_probe.fs
-irradiance basic.vs irradiance.fs
+irradiance quad.vs irradiance.fs
 
 \basic.vs
 
@@ -1328,7 +1328,7 @@ void main()
 
 	// irr *= albedo.xyz;
 
-	FragColor = vec4(irr, 1.0);
+	FragColor = vec4( 1.0);
 
 
 }
