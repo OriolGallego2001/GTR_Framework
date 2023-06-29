@@ -9,6 +9,7 @@ multi basic.vs multi.fs
 gbuffers basic.vs gbuffers.fs
 tonemapper quad.vs tonemapper.fs
 ssao quad.vs ssao.fs
+decal basic.vs decal.fs
 
 deferred_global quad.vs deferred_global.fs
 deferred_light basic.vs deferred_light.fs
@@ -992,4 +993,56 @@ void main()
 
 	FragColor = color;
 	gl_FragDepth = depth;
+}
+
+
+\decal.fs
+#version 330 core
+
+in vec2 v_uv;
+
+uniform mat4 u_inverse_viewprojection;
+uniform mat4 u_light_shadowmap_vp;
+uniform vec2 u_iRes;
+uniform vec3 u_camera_position;
+
+uniform mat4 u_model;
+uniform mat4 u_imodel;
+
+uniform sampler2D u_depth_texture;
+uniform sampler2D u_decal_texture;
+uniform sampler2D u_gb0_texture;
+uniform sampler2D u_gb1_texture;
+uniform sampler2D u_gb2_texture;
+
+
+
+
+out vec4 FragColor;
+
+void main() {
+
+	vec2 uv = gl_FragCoord.xy * u_iRes.xy;
+
+	float depth = texture(u_depth_texture, uv).x;
+
+
+	vec4 screen_position = vec4(uv.x * 2.0 - 1.0, uv.y * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
+
+	vec4 proj_worldpos = u_inverse_viewprojection * screen_position;
+	vec3 worldPos = proj_worldpos.xyz / proj_worldpos.w;
+
+	vec3 localpos = (u_imodel * vec4(worldPos, 1.0)).xyz;
+
+	if (localpos.x < -1.0 || localpos.x> 1.0 ||
+		localpos.y < -1.0 || localpos.y> 1.0 ||
+		localpos.z < -1.0 || localpos.z> 1.0)
+		discard;
+
+	//vec4 color= vec4(worldPos.xyz*.01,1.0);
+	vec2 decal_uv = localpos.xz * 0.5 + vec2(0.5);
+	vec4 decalColor = texture(u_decal_texture, decal_uv);
+	vec4 color = decalColor;
+
+	FragColor = color;
 }
