@@ -28,7 +28,7 @@ GFX::FBO* illumination_fbo = nullptr;
 Renderer::Renderer(const char* shader_atlas_filename)
 {
 	show_volumetric = false;
-	air_density = 0.001;
+	air_density = 0.0001;
 	render_wireframe = false;
 	render_boundaries = false;
 	show_gbuffers = false;
@@ -795,7 +795,7 @@ void Renderer::renderDeferred(Scene* scene, Camera* camera)
 		gbuffers_fbo->create(size.x, size.y, 3, GL_RGBA, GL_UNSIGNED_BYTE, true);
 
 		volumetric_fbo = new GFX::FBO();
-		volumetric_fbo->create(size.x, size.y, 1, GL_RGB, GL_UNSIGNED_BYTE,false);
+		volumetric_fbo->create(size.x, size.y, 1, GL_RGBA, GL_UNSIGNED_BYTE,false);
 	}
 	gbuffers_fbo->bind();
 
@@ -815,9 +815,11 @@ void Renderer::renderDeferred(Scene* scene, Camera* camera)
 
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
+
+
 	shader = GFX::Shader::Get("volumetric");
 	shader->enable();
-
+	
 
 	shader->setTexture("u_depth_texture", gbuffers_fbo->depth_texture, 3);
 	shader->setUniform("u_camera_position", camera->eye);
@@ -826,10 +828,12 @@ void Renderer::renderDeferred(Scene* scene, Camera* camera)
 	shader->setUniform("u_air_density", air_density);
 
 	LightEntity* spot = lights[0];
-
+	
 	lightToShader(spot, shader);
-
 	quad->render(GL_TRIANGLES);
+
+	
+
 	volumetric_fbo->unbind();
 
 	light_fbo->bind();
@@ -864,7 +868,7 @@ void Renderer::renderDeferred(Scene* scene, Camera* camera)
 	shader->setTexture("u_normal_texture", gbuffers_fbo->color_textures[1], 1);
 	shader->setTexture("u_extra_texture", gbuffers_fbo->color_textures[2], 2);
 	shader->setTexture("u_depth_texture", gbuffers_fbo->depth_texture, 3);
-	glDisable(GL_DEPTH_TEST);
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
 	shader->setUniform("u_iRes", vec2(1 / size.x, 1 / size.y));
@@ -894,6 +898,17 @@ void Renderer::renderDeferred(Scene* scene, Camera* camera)
 		}
 	}
 	glDisable(GL_BLEND);
+
+	if (volumetric_fbo)
+	{
+		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		volumetric_fbo->color_textures[0]->toViewport();
+		glDisable(GL_BLEND);
+	}
+	
+
 	shader->disable();
 	light_fbo->unbind();
 
@@ -928,6 +943,8 @@ void Renderer::renderDeferred(Scene* scene, Camera* camera)
 		light_fbo->color_textures[0]->toViewport(shader);
 
 	}
+	if (show_volumetric)
+		volumetric_fbo->color_textures[0]->toViewport();
 
 }
 
